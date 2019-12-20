@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
+
 class QuantifiedChemical(object):
     def __init__(self, name, quantity):
         self.name = name
@@ -36,6 +37,7 @@ class RecyclingBin(object):
             return recycled
         else:
             return 0
+
 
 class OreCalculator(object):
     def __init__(self):
@@ -81,6 +83,7 @@ class OreCalculator(object):
             
             return total_ore
 
+
 def main():
     input_ = sys.argv[1]
 
@@ -95,6 +98,7 @@ def main():
     ore = calculator.calculate(formulas)
     print("Minimum ORE required: %d" % (ore,))
 
+
 def parse(lines):
     for line in lines:
         chemicals, _, product = line.partition("=>")
@@ -103,9 +107,11 @@ def parse(lines):
         
         yield Formula(chemicals, product)
 
+
 def parse_quantity_and_chemical(input_):
     quantity, _, name = input_.strip().partition(" ")
     return QuantifiedChemical(name, int(quantity))
+
 
 if __name__ == "__main__":
     main()
