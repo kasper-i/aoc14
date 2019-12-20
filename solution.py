@@ -40,16 +40,16 @@ class RecyclingBin(object):
 
 
 class OreCalculator(object):
-    def __init__(self):
+    def __init__(self, formulas):
         self.formulas_by_product = dict()
-        self.recycling_bin = RecyclingBin()
 
-    def calculate(self, formulas):
         for r in formulas:
             self.formulas_by_product[r.product.name] = r
 
-        fuel_formula = self.formulas_by_product['FUEL']
+        self.recycling_bin = RecyclingBin()
 
+    def calculate(self):
+        fuel_formula = self.formulas_by_product['FUEL']
         return self.__calc_ore(fuel_formula.chemicals)
 
     def __calc_ore(self, chemicals):
@@ -94,10 +94,22 @@ def main():
             print(formula)
             formulas.append(formula)
 
-    calculator = OreCalculator()
-    ore = calculator.calculate(formulas)
+    calculator = OreCalculator(formulas)
+    ore = calculator.calculate()
     print("Minimum ORE required: %d" % (ore,))
 
+    calculator = OreCalculator(formulas)
+    ore_inventory = 1000000000000
+    fuel_produced = 0
+
+    while ore_inventory > 0:
+        ore_consumed = calculator.calculate()
+        ore_inventory -= ore_consumed
+
+        if ore_inventory >= 0:
+            fuel_produced += 1
+
+    print("1 trillion ORE would produce %d FUEL" % (fuel_produced,))
 
 def parse(lines):
     for line in lines:
