@@ -38,6 +38,16 @@ class RecyclingBin(object):
         else:
             return 0
 
+    def clone(self):
+        cloned_quantities = dict()
+
+        for k, v in self.quantities.items():
+            cloned_quantities[k] = v
+
+        clone = RecyclingBin()
+        clone.quantities = cloned_quantities
+        return clone
+
 
 class OreCalculator(object):
     def __init__(self, formulas):
@@ -48,9 +58,14 @@ class OreCalculator(object):
 
         self.recycling_bin = RecyclingBin()
 
-    def calculate(self):
+    def calculate(self, multiplier):
         fuel_formula = self.formulas_by_product['FUEL']
-        return self.__calc_ore(fuel_formula.chemicals)
+
+        required_chemicals = []
+        for qc in fuel_formula.chemicals:
+            required_chemicals.append(QuantifiedChemical(qc.name, multiplier * qc.quantity))
+
+        return self.__calc_ore(required_chemicals)
 
     def __calc_ore(self, chemicals):
         if len(chemicals) == 1:
@@ -95,19 +110,30 @@ def main():
             formulas.append(formula)
 
     calculator = OreCalculator(formulas)
-    ore = calculator.calculate()
+    ore = calculator.calculate(1)
     print("Minimum ORE required: %d" % (ore,))
 
     calculator = OreCalculator(formulas)
     ore_inventory = 1000000000000
     fuel_produced = 0
 
+    multiplier = ore_inventory
+
     while ore_inventory > 0:
-        ore_consumed = calculator.calculate()
+        if multiplier > 1:
+            previous_recycling_bin = calculator.recycling_bin.clone()
+
+        ore_consumed = calculator.calculate(multiplier)
+
+        if (ore_inventory - ore_consumed) < 0 and multiplier > 1:
+            multiplier //= 10
+            calculator.recycling_bin = previous_recycling_bin
+            continue
+
         ore_inventory -= ore_consumed
 
         if ore_inventory >= 0:
-            fuel_produced += 1
+            fuel_produced += multiplier
 
     print("1 trillion ORE would produce %d FUEL" % (fuel_produced,))
 
